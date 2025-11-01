@@ -31,12 +31,13 @@ export default function QAInterface() {
     setAnswer('');
     setError('');
 
-    try {
-      const response = await fetch('/api/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, question })
-      });
+ try {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ask`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic, question })
+  });
+
 
       const data = await response.json();
 
