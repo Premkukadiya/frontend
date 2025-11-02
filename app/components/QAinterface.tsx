@@ -31,13 +31,21 @@ export default function QAInterface() {
     setAnswer('');
     setError('');
 
- try {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/ask`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ topic, question })
-  });
+    try {
+      // 🌐 Auto-detect environment and set backend URL
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL ||
+        (typeof window !== "undefined" && window.location.hostname === "localhost"
+          ? "http://127.0.0.1:5000"
+          : "https://backend-1tqc.onrender.com");
 
+      console.log("Using backend:", backendUrl);
+
+      const response = await fetch(`${backendUrl}/api/ask`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, question })
+      });
 
       const data = await response.json();
 
@@ -46,13 +54,16 @@ export default function QAInterface() {
       }
 
       setAnswer(data.answer);
-      setHistory(prev => [{
-        id: Date.now(),
-        topic,
-        question,
-        answer: data.answer,
-        timestamp: new Date().toLocaleString()
-      }, ...prev]);
+      setHistory(prev => [
+        {
+          id: Date.now(),
+          topic,
+          question,
+          answer: data.answer,
+          timestamp: new Date().toLocaleString(),
+        },
+        ...prev,
+      ]);
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -61,6 +72,7 @@ export default function QAInterface() {
       setLoading(false);
     }
   };
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.ctrlKey && e.key === 'Enter') {
